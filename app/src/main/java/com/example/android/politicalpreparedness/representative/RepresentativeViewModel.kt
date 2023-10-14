@@ -4,14 +4,15 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.android.politicalpreparedness.base.BaseViewModel
 import com.example.android.politicalpreparedness.R
+import com.example.android.politicalpreparedness.base.BaseViewModel
 import com.example.android.politicalpreparedness.network.CivicsApiInstance
 import com.example.android.politicalpreparedness.network.models.Address
 import com.example.android.politicalpreparedness.repository.RepresentativesRepository
+import com.example.android.politicalpreparedness.representative.model.Representative
 import kotlinx.coroutines.launch
 
-class RepresentativesViewModel(app: Application) : BaseViewModel(app) {
+class RepresentativesViewModel(private val app: Application) : BaseViewModel(app) {
 
     private val repository = RepresentativesRepository(CivicsApiInstance)
 
@@ -65,5 +66,13 @@ class RepresentativesViewModel(app: Application) : BaseViewModel(app) {
         } else {
             showSnackBarInt.value = R.string.current_location_is_not_us_msg
         }
+    }
+
+    fun setMyRepresentativesList(reps: List<Representative>?) {
+        representatives.value = reps
+    }
+
+    fun setAddress(address: Address) {
+        _address.value = address
     }
 }

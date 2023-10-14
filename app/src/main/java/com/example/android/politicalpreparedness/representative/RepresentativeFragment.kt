@@ -8,6 +8,7 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.view.*
@@ -15,30 +16,41 @@ import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import com.example.android.politicalpreparedness.R
+import com.example.android.politicalpreparedness.base.BaseFragment
 import com.example.android.politicalpreparedness.databinding.FragmentRepresentativeBinding
 import com.example.android.politicalpreparedness.network.models.Address
 import com.example.android.politicalpreparedness.representative.adapter.RepresentativeListAdapter
-import com.example.android.politicalpreparedness.base.BaseFragment
+import com.example.android.politicalpreparedness.representative.model.Representative
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import java.util.*
 
 class RepresentativesFragment : BaseFragment() {
 
+    companion object {
+        private const val ANIMATE_STATE_KEY = "ANIMATE_STATE"
+        private const val savedRepresentativesListKey = "REPRESENTATIVE_LIST"
+        private const val ADDRESS = "ADDRESS"
+        private const val INDEX = "INDEX"
+    }
+
     override val viewModel: RepresentativesViewModel by viewModels()
 
     private lateinit var requestLocationPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var enableLocationSettingLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private lateinit var binding: FragmentRepresentativeBinding
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentRepresentativeBinding.inflate(inflater)
+        binding = FragmentRepresentativeBinding.inflate(inflater)
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
 
@@ -60,7 +72,40 @@ class RepresentativesFragment : BaseFragment() {
         registerEnableLocationCallback()
         binding.locationButton.setOnClickListener { requestLocationPermissions() }
 
+        if (savedInstanceState != null) {
+            binding.motionLayout.transitionToState(savedInstanceState.getInt(ANIMATE_STATE_KEY))
+            savedInstanceState.getParcelable<Address>(ADDRESS)?.let {
+                viewModel.setAddress(it)
+            }
+            savedInstanceState.getInt(INDEX).let {
+                viewModel.selectedStateIndex.value = it
+            }
+            savedInstanceState.getParcelableArrayList<Representative>(
+                savedRepresentativesListKey
+            ).let {
+                viewModel.setMyRepresentativesList(it)
+            }
+        }
+
         return binding.root
+    }
+
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(ANIMATE_STATE_KEY, binding.motionLayout.currentState)
+        if (viewModel.representatives.value != null) {
+            outState.putParcelableArrayList(
+                savedRepresentativesListKey,
+                ArrayList(viewModel.representatives.value!!)
+            )
+        }
+        viewModel.address.value?.let {
+            outState.putParcelable(ADDRESS, it)
+        }
+        viewModel.selectedStateIndex.value?.let{
+            outState.putInt(INDEX, it)
+        }
     }
 
     private fun registerLocationPermissionsCallback() {
