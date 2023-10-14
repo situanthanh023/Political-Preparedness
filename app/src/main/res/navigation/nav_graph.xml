@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    android:label="nav_graph"
+    app:startDestination="@id/launchFragment">
+
+
+    <fragment
+        android:id="@+id/launchFragment"
+        android:name="com.example.android.politicalpreparedness.launch.LaunchFragment"
+        android:label="LaunchFragment" >
+        <action
+            android:id="@+id/action_launchFragment_to_electionsFragment"
+            app:destination="@id/electionsFragment" />
+        <action
+            android:id="@+id/action_launchFragment_to_representativesFragment"
+            app:destination="@id/representativesFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/electionsFragment"
+        android:name="com.example.android.politicalpreparedness.election.ElectionsFragment"
+        android:label="ElectionsFragment" >
+        <action
+            android:id="@+id/action_electionsFragment_to_voterInfoFragment"
+            app:destination="@id/voterInfoFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/voterInfoFragment"
+        android:name="com.example.android.politicalpreparedness.election.VoterInfoFragment"
+        android:label="VoterInfoFragment" >
+        <argument
+            android:name="election"
+            app:argType="com.example.android.politicalpreparedness.network.models.Election" />
+    </fragment>
+    <fragment
+        android:id="@+id/representativesFragment"
+        android:name="com.example.android.politicalpreparedness.representative.RepresentativesFragment"
+        android:label="RepresentativesFragment" />
+</navigation>
